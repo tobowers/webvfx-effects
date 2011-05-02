@@ -1,0 +1,80 @@
+<html>
+<head>
+<style type="text/css">
+  body, html {
+    width: 100%, height: 100%;
+    margin: 0;
+  }
+  body {
+    display: -webkit-box;
+    -webkit-box-orient: horizontal;
+    -webkit-box-pack: center;
+    -webkit-box-align: center;
+  }
+  img, canvas {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+  #sourceImg {
+      z-index: 10;
+  }
+  #targetImg {
+      z-index: 5;
+  }
+</style>
+<script type="text/javascript" src="../../lib/stackblur.js"></script>
+
+<script type="text/javascript">
+
+function $(id) {
+    return document.getElementById(id);
+}
+
+function Transition() {
+    this.sourceImage = new Image();
+    this.targetImage = new Image();
+    this.context = $("canvasResult").getContext('2d');
+}
+
+Transition.prototype.render = function (time) {
+    console.log('hi ' + time.toString());
+    webvfx.getImage('sourceImage').assignToHTMLImageElement(this.sourceImage);
+    webvfx.getImage('targetImage').assignToHTMLImageElement(this.targetImage);
+    this.context.drawImage(this.sourceImage, 0,0, 320, 240);
+    console.log("getting data");
+    try {
+        var data = this.context.getImageData( 0, 0, 320, 240 );
+    } catch (e) {
+        alert(e.message);
+        throw e;
+    }
+    console.log("putting data");
+    this.context.putImageData(data);
+    console.log('put data');
+    //stackBlurCanvasRGB("canvasResult", 0,0,320,240,time * 1000)//, blurAlphaChannel )
+};
+
+var transition
+
+function onLoad() {
+    transition = new Transition();
+
+
+    webvfx.renderRequested.connect(transition, Transition.prototype.render);
+    webvfx.imageTypeMap = {
+                              "sourceImage" : webvfx.SourceImageType,
+                              "targetImage" : webvfx.TargetImageType
+                          };
+    webvfx.readyRender(true);
+}
+
+window.addEventListener("load", onLoad, false);
+</script>
+</head>
+<body>
+    <canvas id="canvasResult" width="320" height="240"></canvas>
+</body>
+</html>
